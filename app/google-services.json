@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "241649170097",
+    "project_id": "orientconnect-b0ac2",
+    "storage_bucket": "orientconnect-b0ac2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241649170097:android:7aad8a458352601d931490",
+        "android_client_info": {
+          "package_name": "com.example.orientconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "241649170097-oa5plluonntcne9dj3jhiq1ai3005l81.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSJCp_U3ZMwzoGxCtDntGo1BdDVo97Jk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "241649170097-oa5plluonntcne9dj3jhiq1ai3005l81.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
