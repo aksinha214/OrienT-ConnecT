@@ -14,6 +14,7 @@ import androidx.viewpager.widget.ViewPager
 import com.example.orientconnect.Fragments.ChatsFragment
 import com.example.orientconnect.Fragments.SearchFragment
 import com.example.orientconnect.Fragments.SettingsFragment
+import com.example.orientconnect.ModelClasses.Chat
 import com.example.orientconnect.ModelClasses.Users
 import com.example.orientconnect.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
@@ -56,13 +57,50 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbarMain)
         supportActionBar?.title = ""
 
-        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+       /* val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
         viewPagerAdapter.addFragment(ChatsFragment(), "Chats")
         viewPagerAdapter.addFragment(SearchFragment(), "Search")
         viewPagerAdapter.addFragment(SettingsFragment(), "Settings")
 
         viewPager.adapter = viewPagerAdapter
-        tabLayout.setupWithViewPager(viewPager)
+        tabLayout.setupWithViewPager(viewPager)*/
+
+        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
+        ref!!.addValueEventListener(object : ValueEventListener{
+
+            override fun onDataChange(p0: DataSnapshot) {
+                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+                var countunreadMessages = 0
+
+                for (dataSnapshot in p0.children)
+                {
+                    val chat = dataSnapshot.getValue(Chat::class.java)
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isIsSeen())
+                    {
+                        countunreadMessages += 1
+                    }
+                }
+
+                if(countunreadMessages == 0)
+                {
+                    viewPagerAdapter.addFragment(ChatsFragment(), "Chats")
+                }
+                else
+                {
+                    viewPagerAdapter.addFragment(ChatsFragment(), "($countunreadMessages) Chats")
+                }
+
+                viewPagerAdapter.addFragment(SearchFragment(), "Search")
+                viewPagerAdapter.addFragment(SettingsFragment(), "Settings")
+                viewPager.adapter = viewPagerAdapter
+                tabLayout.setupWithViewPager(viewPager)
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
 
         // Display username and profile picture
         refUsers!!.addValueEventListener(object : ValueEventListener {

@@ -10,6 +10,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.orientconnect.AdapterClasses.ChatsAdapter
 import com.example.orientconnect.ModelClasses.Chat
@@ -38,20 +40,40 @@ class MessageChatActivity : AppCompatActivity() {
     private lateinit var attact_image_file_btn: ImageView
     private var reference: DatabaseReference? = null
     private var chatsListReference: DatabaseReference? = null
+    private lateinit var recycler_view_chats: RecyclerView
+    private  var toolbar_message_chat:Toolbar?=null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message_chat)
+
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_message_chat)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            val intent = Intent(this@MessageChatActivity,WelcomeActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            finish()
+        }
+
         intent = intent
         userIdVisit = intent.getStringExtra("visit_id")!!
         firebaseUser = FirebaseAuth.getInstance().currentUser
 
+        recycler_view_chats = findViewById(R.id.recycler_view_chats)
         send_message_btn = findViewById(R.id.send_message_btn)
         text_message = findViewById(R.id.text_message)
         username_mchat = findViewById(R.id.username_mchat)
         profile_image_mchat = findViewById(R.id.profile_image_mchat)
         attact_image_file_btn = findViewById(R.id.attact_image_file_btn)
 
+
+        recycler_view_chats.setHasFixedSize(true)
+        val linearLayoutManager = LinearLayoutManager(applicationContext)
+        recycler_view_chats.layoutManager = linearLayoutManager
         reference = FirebaseDatabase.getInstance().reference
             .child("Users").child(userIdVisit)
 
@@ -83,6 +105,8 @@ class MessageChatActivity : AppCompatActivity() {
             intent.type = "image/*"
             startActivityForResult(Intent.createChooser(intent, "Pick Image"), 438)
         }
+
+        seenMessage(userIdVisit)
     }
 
     private fun sendMessageToUser(senderId: String, receiverId: String?, message: String) {
@@ -131,9 +155,9 @@ class MessageChatActivity : AppCompatActivity() {
 
     private fun retrieveMessages(senderId: String, receiverId: String?, receiverImageUrl: String?) {
         val mChatList = ArrayList<Chat>()
-        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
+        reference = FirebaseDatabase.getInstance().reference.child("Chats")
 
-        reference.addValueEventListener(object : ValueEventListener {
+    reference!!.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 mChatList.clear()
                 for (snapshot in p0.children) {
@@ -153,5 +177,37 @@ class MessageChatActivity : AppCompatActivity() {
 
             }
         })
+    }
+
+
+    var seenListner: ValueEventListener? = null
+    private fun seenMessage(userId:String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
+
+        seenListner = reference!!.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(p0: DataSnapshot) {
+               for (dataSnapshot in p0.children)
+               {
+                   val chat = dataSnapshot.getValue(Chat::class.java)
+
+                   if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getSender().equals(userId)){
+                       val hashMap = HashMap<String, Any>()
+                       hashMap["isseen"] = true
+                       dataSnapshot.ref.updateChildren(hashMap)
+
+                   }
+
+               }
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        reference!!.removeEventListener(seenListner!!)
     }
 }
