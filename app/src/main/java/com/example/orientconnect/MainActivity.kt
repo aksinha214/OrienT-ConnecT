@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
         user_name = findViewById(R.id.user_name)
@@ -50,45 +49,31 @@ class MainActivity : AppCompatActivity() {
         firebaseUser = FirebaseAuth.getInstance().currentUser
         if (firebaseUser != null) {
             refUsers = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
-        } else {
-
         }
 
         setSupportActionBar(binding.toolbarMain)
         supportActionBar?.title = ""
 
-       /* val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        viewPagerAdapter.addFragment(ChatsFragment(), "Chats")
-        viewPagerAdapter.addFragment(SearchFragment(), "Search")
-        viewPagerAdapter.addFragment(SettingsFragment(), "Settings")
-
-        viewPager.adapter = viewPagerAdapter
-        tabLayout.setupWithViewPager(viewPager)*/
-
         val ref = FirebaseDatabase.getInstance().reference.child("Chats")
-        ref!!.addValueEventListener(object : ValueEventListener{
+        ref!!.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(p0: DataSnapshot) {
                 val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-                var countunreadMessages = 0
+                var countUnreadMessages = 0
 
                 for (dataSnapshot in p0.children)
                 {
                     val chat = dataSnapshot.getValue(Chat::class.java)
                     if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isIsSeen())
                     {
-                        countunreadMessages += 1
+                        countUnreadMessages++
+                        //countunreadMessages += 1
                     }
                 }
 
-                if(countunreadMessages == 0)
-                {
-                    viewPagerAdapter.addFragment(ChatsFragment(), "Chats")
-                }
-                else
-                {
-                    viewPagerAdapter.addFragment(ChatsFragment(), "($countunreadMessages) Chats")
-                }
+                val chatsTitle = if (countUnreadMessages == 0) "Chats"
+                else "($countUnreadMessages) Unread Chats"
+                viewPagerAdapter.addFragment(ChatsFragment(), chatsTitle)
 
                 viewPagerAdapter.addFragment(SearchFragment(), "Search")
                 viewPagerAdapter.addFragment(SettingsFragment(), "Settings")
@@ -97,13 +82,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                // Handle onCancelled
             }
-
         })
 
         // Display username and profile picture
-        refUsers!!.addValueEventListener(object : ValueEventListener {
+        refUsers?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 if (p0.exists()) {
                     val user: Users? = p0.getValue(Users::class.java)

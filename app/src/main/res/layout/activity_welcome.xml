@@ -15,6 +15,7 @@
         android:textColor="@color/DarkBlue"
         android:textSize="30sp"
         android:textStyle="bold"
+        android:textAlignment="center"
         android:text="@string/Welcome">
 
     </TextView>

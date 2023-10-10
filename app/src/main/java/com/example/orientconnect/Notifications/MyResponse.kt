@@ -1,4 +1,7 @@
 package com.example.orientconnect.Notifications
 
-class MyResponse {
+class MyResponse
+{
+
+    var success = 0
 }

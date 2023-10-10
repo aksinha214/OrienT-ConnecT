@@ -10,10 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.orientconnect.AdapterClasses.UserAdapter
 import com.example.orientconnect.ModelClasses.Chatlist
 import com.example.orientconnect.ModelClasses.Users
+import com.example.orientconnect.Notifications.Token
 import com.example.orientconnect.R
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.messaging.FirebaseMessaging
 
 class ChatsFragment : Fragment() {
 
@@ -53,8 +56,28 @@ class ChatsFragment : Fragment() {
             }
         })
 
+       updateToken(FirebaseMessaging.getInstance().token)
+
+
 
         return view
+    }
+
+    private fun updateToken(token: Task<String>)
+    {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    if (token != null) {
+                        val ref = FirebaseDatabase.getInstance().reference.child("Tokens")
+                        val token1 = Token(token)
+                        ref.child(firebaseUser!!.uid).setValue(token1)
+                    }
+                } else {
+                    // Handle token generation failure
+                }
+            }
     }
 
     private fun retrieveChatList() {

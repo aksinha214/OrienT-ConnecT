@@ -1,4 +1,3 @@
 package com.example.orientconnect.Notifications
 
-class Sender {
-}
+class Sender(var data: Data,var to:String)
